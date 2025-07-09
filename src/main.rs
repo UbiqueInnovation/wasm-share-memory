@@ -13,6 +13,9 @@ fn main() {
 
     let wasm = std::fs::read(input_file).unwrap();
 
+    let heap_base = wasm_multi_loader::get_heap_base(&wasm);
+    println!("Heap Base: {heap_base}");
+
     let patched = wasm_multi_loader::relocate(&wasm, offset);
 
     std::fs::write(output_file, patched).expect("Failed to write wasm file.")
