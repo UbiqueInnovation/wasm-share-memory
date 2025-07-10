@@ -4,7 +4,6 @@ resolver = "3"
 members = [
     "rust-cli",
     "rust-lib",
-    "example/rust-runtime",
     "example/rust-library-common",
     "example/rust-library-A",
     "example/rust-library-B",

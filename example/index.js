@@ -12,33 +12,24 @@ const libb = fs.readFileSync('./output/b.wasm');
 const baseCommon = await getHeapBase(libcommon);
 const baseA = await getHeapBase(liba);
 const baseB = await getHeapBase(libb);
-const baseRuntime = await getHeapBase(runtime);
 
 console.log(`Heap Base Common: ${baseCommon}`);
 console.log(`Heap Base A: ${baseA}`);
 console.log(`Heap Base B: ${baseB}`);
-console.log(`Heap Base Runtime: ${baseRuntime}`);
 
-const absoluteHeapBase = baseCommon + baseA + baseB + baseRuntime;
+const absoluteHeapBase = baseCommon + baseA + baseB;
 
 const patchedCommon = await relocate(libcommon, 0, absoluteHeapBase);
 const patchedLibA = await relocate(liba, baseCommon, absoluteHeapBase);
 const patchedLibB = await relocate(libb, baseCommon + baseA, absoluteHeapBase);
-const patchedRuntime = await relocate(
-    runtime,
-    baseCommon + baseA + baseB,
-    absoluteHeapBase,
-);
 
 const baseCommonPatched = await getHeapBase(patchedCommon);
 const baseAPatched = await getHeapBase(patchedLibA);
 const baseBPatched = await getHeapBase(patchedLibB);
-const baseRuntimePatched = await getHeapBase(patchedRuntime);
 
 console.log(`Patched Heap Base Common: ${baseCommonPatched}`);
 console.log(`Patched Heap Base A: ${baseAPatched}`);
 console.log(`Patched Heap Base B: ${baseBPatched}`);
-console.log(`Patched Heap Base Runtime: ${baseRuntimePatched}`);
 
 // Instantiate
 
@@ -47,10 +38,6 @@ console.log(`Memory pages needed: ${pagesNeeded}`);
 
 const memory = new WebAssembly.Memory({
     initial: pagesNeeded,
-});
-
-const { instance: irun } = await WebAssembly.instantiate(patchedRuntime, {
-    env: { memory },
 });
 
 const { instance: icommon } = await WebAssembly.instantiate(patchedCommon, {
