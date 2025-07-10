@@ -1,13 +1,7 @@
-[package]
-name = "wasm-multi-loader"
-version = "0.1.0"
-edition = "2024"
+[workspace]
+resolver = "3"
 
-[lib]
-name = "wasm_multi_loader"
-path = "src/lib.rs"
-crate-type = ["lib", "cdylib", "staticlib"]
+members = ["rust-cli", "rust-lib"]
 
-[dependencies]
-walrus = "0.23.3"
-wasm-bindgen = "0.2.100"
+[profile.release]
+opt-level = "s"
