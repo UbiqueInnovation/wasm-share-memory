@@ -1,0 +1,12 @@
+[package]
+name = "example-library-a"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+name = "a"
+path = "src/lib.rs"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+example-library-common = { path = "../rust-library-common" }

@@ -1,0 +1,9 @@
+[package]
+name = "example-library-common"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+name = "common"
+path = "src/lib.rs"
+crate-type = ["cdylib", "rlib"]

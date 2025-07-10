@@ -1,0 +1,22 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .:
+    dependencies:
+      wasm-share-memory:
+        specifier: file:../
+        version: file:..
+
+packages:
+
+  wasm-share-memory@file:..:
+    resolution: {directory: .., type: directory}
+
+snapshots:
+
+  wasm-share-memory@file:..: {}
