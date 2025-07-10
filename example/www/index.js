@@ -1,4 +1,4 @@
-import { getHeapBase, relocate } from './public/index.mjs';
+import { combine } from './public/index.mjs';
 
 const valueElem = document.getElementById('value');
 const doubledElem = document.getElementById('doubled');
@@ -15,53 +15,29 @@ const libb = new Uint8Array(await (await fetch('public/b.wasm')).arrayBuffer());
 // Layout:
 // common | lib a | lib b | runtime | heap
 
-const baseCommon = await getHeapBase(libcommon);
-const baseA = await getHeapBase(liba);
-const baseB = await getHeapBase(libb);
-
-console.log(`Heap Base Common: ${baseCommon}`);
-console.log(`Heap Base A: ${baseA}`);
-console.log(`Heap Base B: ${baseB}`);
-
-const absoluteHeapBase = baseCommon + baseA + baseB;
-
-const patchedCommon = await relocate(libcommon, 0, absoluteHeapBase);
-const patchedLibA = await relocate(liba, baseCommon, absoluteHeapBase);
-const patchedLibB = await relocate(libb, baseCommon + baseA, absoluteHeapBase);
-
-const baseCommonPatched = await getHeapBase(patchedCommon);
-const baseAPatched = await getHeapBase(patchedLibA);
-const baseBPatched = await getHeapBase(patchedLibB);
-
-console.log(`Patched Heap Base Common: ${baseCommonPatched}`);
-console.log(`Patched Heap Base A: ${baseAPatched}`);
-console.log(`Patched Heap Base B: ${baseBPatched}`);
+const { modules, neededPages } = await combine([libcommon, liba, libb]);
 
 // Instantiate
 
-const pagesNeeded = Math.floor(absoluteHeapBase / 65536) + 1;
-console.log(`Memory pages needed: ${pagesNeeded}`);
-
 const memory = new WebAssembly.Memory({
-    initial: pagesNeeded,
+    initial: neededPages,
 });
 
-const { instance: icommon } = await WebAssembly.instantiate(patchedCommon, {
+const { instance: icommon } = await WebAssembly.instantiate(modules[0], {
     env: { memory },
 });
 
-const { instance: ia } = await WebAssembly.instantiate(patchedLibA, {
+const { instance: ia } = await WebAssembly.instantiate(modules[1], {
     env: { memory },
 });
 
-const { instance: ib } = await WebAssembly.instantiate(patchedLibB, {
+const { instance: ib } = await WebAssembly.instantiate(modules[2], {
     env: { memory },
 });
 
 // Test
 
 const object = icommon.exports.create_object(1337n);
-console.log('obj:', object);
 
 const value = ia.exports.get_value(object);
 valueElem.innerText = value.toString();

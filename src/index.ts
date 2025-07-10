@@ -37,3 +37,28 @@ export async function relocate(
     await initialize();
     return rust_relocate(module, offset, heapBase);
 }
+
+export async function combine(modules: Uint8Array[]) {
+    const heapBases = await Promise.all(
+        modules.map((module) => getHeapBase(module)),
+    );
+
+    const heapBase = heapBases.reduce((acc, base) => acc + base, 0);
+
+    const relocated = [];
+    for (let i = 0; i < modules.length; i++) {
+        const module = modules[i];
+        const offset = heapBases
+            .slice(0, i)
+            .reduce((acc, base) => acc + base, 0);
+        relocated.push(await relocate(module, offset, heapBase));
+    }
+
+    // floor + 1 rather than ceil, just in case to be safe
+    const pagesNeeded = Math.floor(heapBase / 65536) + 1;
+
+    return {
+        modules: relocated,
+        neededPages: pagesNeeded,
+    };
+}

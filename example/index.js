@@ -1,54 +1,30 @@
 import * as fs from 'fs';
-import { getHeapBase, relocate } from 'wasm-share-memory';
+import { combine } from 'wasm-share-memory';
 
-const runtime = fs.readFileSync('./output/runtime.wasm');
 const libcommon = fs.readFileSync('./output/common.wasm');
 const liba = fs.readFileSync('./output/a.wasm');
 const libb = fs.readFileSync('./output/b.wasm');
 
 // Layout:
-// common | lib a | lib b | runtime | heap
+// common | lib a | lib b | heap
 
-const baseCommon = await getHeapBase(libcommon);
-const baseA = await getHeapBase(liba);
-const baseB = await getHeapBase(libb);
-
-console.log(`Heap Base Common: ${baseCommon}`);
-console.log(`Heap Base A: ${baseA}`);
-console.log(`Heap Base B: ${baseB}`);
-
-const absoluteHeapBase = baseCommon + baseA + baseB;
-
-const patchedCommon = await relocate(libcommon, 0, absoluteHeapBase);
-const patchedLibA = await relocate(liba, baseCommon, absoluteHeapBase);
-const patchedLibB = await relocate(libb, baseCommon + baseA, absoluteHeapBase);
-
-const baseCommonPatched = await getHeapBase(patchedCommon);
-const baseAPatched = await getHeapBase(patchedLibA);
-const baseBPatched = await getHeapBase(patchedLibB);
-
-console.log(`Patched Heap Base Common: ${baseCommonPatched}`);
-console.log(`Patched Heap Base A: ${baseAPatched}`);
-console.log(`Patched Heap Base B: ${baseBPatched}`);
+const { modules, neededPages } = await combine([libcommon, liba, libb]);
 
 // Instantiate
 
-const pagesNeeded = Math.floor(absoluteHeapBase / 65536) + 1;
-console.log(`Memory pages needed: ${pagesNeeded}`);
-
 const memory = new WebAssembly.Memory({
-    initial: pagesNeeded,
+    initial: neededPages,
 });
 
-const { instance: icommon } = await WebAssembly.instantiate(patchedCommon, {
+const { instance: icommon } = await WebAssembly.instantiate(modules[0], {
     env: { memory },
 });
 
-const { instance: ia } = await WebAssembly.instantiate(patchedLibA, {
+const { instance: ia } = await WebAssembly.instantiate(modules[1], {
     env: { memory },
 });
 
-const { instance: ib } = await WebAssembly.instantiate(patchedLibB, {
+const { instance: ib } = await WebAssembly.instantiate(modules[2], {
     env: { memory },
 });
 
