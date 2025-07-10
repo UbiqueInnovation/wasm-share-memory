@@ -8,7 +8,10 @@ const libb = fs.readFileSync('./output/b.wasm');
 // Layout:
 // common | lib a | lib b | heap
 
-const { modules, neededPages } = await combine([libcommon, liba, libb]);
+const { modules, neededPages } = await combine(
+    [libcommon, liba, libb],
+    1024 * 1024,
+);
 
 // Instantiate
 

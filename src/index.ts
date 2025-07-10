@@ -38,19 +38,25 @@ export async function relocate(
     return rust_relocate(module, offset, heapBase);
 }
 
-export async function combine(modules: Uint8Array[]) {
+export async function combine(
+    modules: Uint8Array[],
+    additionalStack: number = 0,
+) {
     const heapBases = await Promise.all(
         modules.map((module) => getHeapBase(module)),
     );
 
-    const heapBase = heapBases.reduce((acc, base) => acc + base, 0);
+    const heapBase = heapBases.reduce(
+        (acc, base) => acc + base + additionalStack,
+        0,
+    );
 
     const relocated = [];
     for (let i = 0; i < modules.length; i++) {
         const module = modules[i];
         const offset = heapBases
             .slice(0, i)
-            .reduce((acc, base) => acc + base, 0);
+            .reduce((acc, base) => acc + base + additionalStack, 0);
         relocated.push(await relocate(module, offset, heapBase));
     }
 
