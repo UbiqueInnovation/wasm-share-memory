@@ -24,11 +24,24 @@ async function initialize() {
     }
 }
 
+/**
+ * Extracts the `__heap_base` global from a WASM module.
+ * @param module - The binary contents of a WASM module.
+ * @returns The heap base address as an integer.
+ */
 export async function getHeapBase(module: Uint8Array) {
     await initialize();
     return get_heap_base(module);
 }
 
+/**
+ * Relocates a WASM module to a new memory offset.
+ * Updates globals, data segments, and heap base.
+ * @param module - WASM module to relocate.
+ * @param offset - Number of bytes to shift memory addresses by.
+ * @param heapBase - New value for the `__heap_base` global.
+ * @returns The relocated WASM module as a Uint8Array.
+ */
 export async function relocate(
     module: Uint8Array,
     offset: number,
@@ -38,6 +51,13 @@ export async function relocate(
     return rust_relocate(module, offset, heapBase);
 }
 
+/**
+ * Combines multiple WASM modules into a shared memory layout.
+ * Each module is relocated to avoid overlap, and the final heap base is calculated.
+ * @param modules - An array of WASM modules to combine.
+ * @param additionalStack - Extra bytes added between module regions (default: 0).
+ * @returns An object containing relocated modules and total memory pages required.
+ */
 export async function combine(
     modules: Uint8Array[],
     additionalStack: number = 0,

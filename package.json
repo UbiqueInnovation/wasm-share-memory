@@ -1,10 +1,22 @@
 {
-    "name": "wasm-share-memory",
-    "version": "0.1.0",
-    "description": "A utility package that allows to share memory between multiple WASM instances",
+    "name": "@ubique-innovation/wasm-share-memory",
+    "version": "0.0.0",
+    "description": "A utility package that allows sharing memory between multiple WASM modules.",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/UbiqueInnovation/wasm-share-memory.git"
+    },
+    "license": "MIT",
+    "keywords": [
+        "Ubique Innovation AG",
+        "WASM",
+        "WebAssembly",
+        "memory sharing"
+    ],
     "scripts": {
         "build:wasm": "rimraf pkg && wasm-pack build rust-lib --target web --out-dir ../pkg --out-name rust_module",
-        "build": "rimraf dist && tsup",
+        "build:package": "rimraf dist && tsup",
+        "build": "pnpm build:wasm && pnpm build:package",
         "format": "prettier --write ."
     },
     "files": [

@@ -1,0 +1,44 @@
+name: Publish on Tag
+on:
+    push:
+        tags: ['v*']
+
+jobs:
+    publish:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Install pnpm
+              uses: pnpm/action-setup@v4
+              with:
+                  version: 10
+
+            - name: Install Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: '20'
+                  registry-url: 'https://registry.npmjs.org/'
+                  cache: 'pnpm'
+
+            - name: Extract version from tag
+              id: extract_version
+              run: |
+                  TAG=${GITHUB_REF#refs/tags/}
+                  VERSION=${TAG#v}
+                  echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+            - name: Set package version
+              run: |
+                  pnpm version $VERSION --no-git-tag-version
+
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+
+            - name: Build the project
+              run: pnpm build
+
+            - name: Publish package
+              run: pnpm publish --access public --no-git-checks
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

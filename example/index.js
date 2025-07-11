@@ -1,5 +1,5 @@
+import { combine } from '@ubique-innovation/wasm-share-memory';
 import * as fs from 'fs';
-import { combine } from 'wasm-share-memory';
 
 const libcommon = fs.readFileSync('./output/common.wasm');
 const liba = fs.readFileSync('./output/a.wasm');

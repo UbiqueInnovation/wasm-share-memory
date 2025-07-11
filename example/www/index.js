@@ -3,9 +3,6 @@ import { combine } from './public/index.mjs';
 const valueElem = document.getElementById('value');
 const doubledElem = document.getElementById('doubled');
 
-const runtime = new Uint8Array(
-    await (await fetch('public/runtime.wasm')).arrayBuffer(),
-);
 const libcommon = new Uint8Array(
     await (await fetch('public/common.wasm')).arrayBuffer(),
 );
@@ -13,7 +10,7 @@ const liba = new Uint8Array(await (await fetch('public/a.wasm')).arrayBuffer());
 const libb = new Uint8Array(await (await fetch('public/b.wasm')).arrayBuffer());
 
 // Layout:
-// common | lib a | lib b | runtime | heap
+// common | lib a | lib b | shared heap
 
 const { modules, neededPages } = await combine([libcommon, liba, libb]);
 

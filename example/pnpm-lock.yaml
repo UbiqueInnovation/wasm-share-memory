@@ -8,15 +8,15 @@ importers:
 
   .:
     dependencies:
-      wasm-share-memory:
+      '@ubique-innovation/wasm-share-memory':
         specifier: file:../
         version: file:..
 
 packages:
 
-  wasm-share-memory@file:..:
+  '@ubique-innovation/wasm-share-memory@file:..':
     resolution: {directory: .., type: directory}
 
 snapshots:
 
-  wasm-share-memory@file:..: {}
+  '@ubique-innovation/wasm-share-memory@file:..': {}

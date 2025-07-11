@@ -18,4 +18,4 @@ cp ../../target/wasm32-unknown-unknown/release/a.wasm $OUTPUT_DIR
 cargo +nightly build -Z build-std="core,std,alloc,panic_abort" --package example-library-b --target wasm32-unknown-unknown --release
 cp ../../target/wasm32-unknown-unknown/release/b.wasm $OUTPUT_DIR
 
-cp ../node_modules/wasm-share-memory/dist/* $OUTPUT_DIR
+cp ../node_modules/@ubique-innovation/wasm-share-memory/dist/* $OUTPUT_DIR
