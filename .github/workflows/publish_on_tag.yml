@@ -21,6 +21,9 @@ jobs:
                   registry-url: 'https://registry.npmjs.org/'
                   cache: 'pnpm'
 
+            - name: Install wasm-pack
+              run: pnpm install -g wasm-pack
+
             - name: Extract version from tag
               id: extract_version
               run: |
