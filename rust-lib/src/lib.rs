@@ -129,6 +129,9 @@ pub fn relocate(module: &[u8], offset: i32, new_heap_base: i32) -> Vec<u8> {
     let stack_pointer = utils::get_global(&module, &globals, symbols::STACK_POINTER)
         .expect("Failed to get stack pointer");
 
+    let memory_base = utils::get_global(&module, &globals, symbols::MEMORY_BASE)
+        .expect("Failed to get memory base");
+
     // Patch __wasm_init_memory function
     {
         let id = module
@@ -179,8 +182,8 @@ pub fn relocate(module: &[u8], offset: i32, new_heap_base: i32) -> Vec<u8> {
             continue;
         };
 
-        // stack <= address < heap      (metadata is stored here)
-        if stack_pointer <= *address && *address < heap_base {
+        // stack <= address <= heap      (metadata is stored here)
+        if stack_pointer <= *address && *address <= heap_base {
             *address += offset;
         }
     }
@@ -199,13 +202,14 @@ pub fn relocate(module: &[u8], offset: i32, new_heap_base: i32) -> Vec<u8> {
 
     // Patch __memory_base, __stack_pointer, __heap_base
     {
-        let memory_base = utils::get_global_mut(&mut module, &globals, symbols::MEMORY_BASE)
+        let memory_base_mut = utils::get_global_mut(&mut module, &globals, symbols::MEMORY_BASE)
             .expect("Failed to get memory base");
-        *memory_base += offset;
+        *memory_base_mut = memory_base + offset;
 
-        let stack_pointer = utils::get_global_mut(&mut module, &globals, symbols::STACK_POINTER)
-            .expect("Failed to get stack pointer");
-        *stack_pointer += offset;
+        let stack_pointer_mut =
+            utils::get_global_mut(&mut module, &globals, symbols::STACK_POINTER)
+                .expect("Failed to get stack pointer");
+        *stack_pointer_mut = stack_pointer + offset;
 
         let heap_base =
             utils::get_global_from_exports_mut(&mut module, &exports, symbols::HEAP_BASE)
